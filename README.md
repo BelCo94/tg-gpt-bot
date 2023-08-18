@@ -5,11 +5,11 @@ The simple telegram bot for the ChatGPT. Just for example and experiments.
 Run:
 
 ```bash
-tg-gpt-bot /path/to/conf/conf.toml
+tg-gpt-bot --config /path/to/conf/conf.toml
 ```
 
 
-Config file example (`conf.toml`): 
+Config file example (`conf/conf.toml` by default): 
 ```toml
 [base]
 USERS_WHITELIST_PATH = "/path/to/conf/users.txt"
