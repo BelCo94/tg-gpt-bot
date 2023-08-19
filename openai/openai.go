@@ -37,15 +37,19 @@ type OpenAIResponse struct {
 }
 
 func PreparePayload(messages []MessageT, config OpenAIConfig) ([]byte, error) {
+	outputMessages := make([]MessageT, 0, len(messages)+1)
 	systemElem := MessageT{
 		Role:    "system",
 		Content: config.SystemPrompt,
 	}
+	outputMessages = append(outputMessages, systemElem)
+	for i := len(messages) - 1; i >= 0; i-- {
+		outputMessages = append(outputMessages, messages[i])
+	}
 	data := payloadT{
 		Model:    config.Model,
-		Messages: append([]MessageT{systemElem}, messages...),
+		Messages: outputMessages,
 	}
-
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
