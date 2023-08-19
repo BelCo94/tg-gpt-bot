@@ -23,6 +23,9 @@ TOKEN = "youropenaitoken"
 MODEL = "gpt-3.5-turbo"
 SYSTEM_PROMPT = "Always start a message with ....."
 
+[db]
+PATH = "db.sqlite3"
+
 ```
 
 Parameters:
@@ -31,7 +34,8 @@ Parameters:
 | -                               | -      | -                                       |
 | base / ADMIN_ID             | int    | Telegram ID of the admin user |
 | base / CHAT_HISTORY_SIZE        | int    | Number of the last messages from the user's chat to be sent as context to the model | 
-| telegram / BOT_TOKEN            | string | Telegram bot token |
+| telegram / TOKEN            | string | Telegram bot token |
 | openai / TOKEN                  | string | OpenAI token |
 | openai / MODEL                  | string | The name of the OpenAI model to be used |
 | openai / SYSTEM_PROMPT          | string | Text to be sent as system prompt to the model (aka context) |
+| db / PATH          | string | Path to the sqlite db file |
