@@ -56,7 +56,7 @@ func (bot *Bot) performAdminCommand(cmd string) string {
 func (bot *Bot) handleNewSource(msg *tgbotapi.Message) error {
 	text := fmt.Sprintf("I was mentioned in the new chat:\nChat ID: `%d`\nChat Title: `%s`\nUser ID: `%d`\nUser name: `%s`", msg.Chat.ID, chatTitle(msg.Chat), msg.From.ID, msg.From.UserName)
 	newMsg := tgbotapi.NewMessage(bot.config.Base.AdminID, text)
-	newMsg.ParseMode = tgbotapi.ModeMarkdown
+	newMsg.ParseMode = "MarkdownV2"
 	_, err := bot.tgbot.Send(newMsg)
 	return err
 }

@@ -149,9 +149,10 @@ func (bot *Bot) askOpenAI(messages []*storage.Message) error {
 	if err != nil {
 		return err
 	}
-	newMsg := tgbotapi.NewMessage(messages[0].ChatID, answer.Content)
+	text := prepareTextForMarkdownV2(answer.Content)
+	newMsg := tgbotapi.NewMessage(messages[0].ChatID, text)
 	newMsg.ReplyToMessageID = int(messages[0].ID)
-	newMsg.ParseMode = tgbotapi.ModeMarkdown
+	newMsg.ParseMode = "MarkdownV2"
 
 	sentMessage, err := bot.tgbot.Send(newMsg)
 	if err != nil {
