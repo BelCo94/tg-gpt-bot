@@ -15,7 +15,8 @@ func (bot *Bot) isAdminCommand(msg *tgbotapi.Message) bool {
 
 func (bot *Bot) handleAdminCommand(msg *tgbotapi.Message) error {
 	text := bot.performAdminCommand(msg.CommandArguments())
-	newMsg := tgbotapi.NewMessage(bot.config.Base.AdminID, text)
+	newMsg := tgbotapi.NewMessage(msg.Chat.ID, text)
+	newMsg.ReplyToMessageID = msg.MessageID
 	_, err := bot.tgbot.Send(newMsg)
 	return err
 }
