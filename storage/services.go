@@ -14,6 +14,9 @@ func (storage *Storage) GetMessageChain(message *Message, chainLength uint16) []
 			fmt.Printf("Message with ID = %d not found in the DB\n", replyToID)
 			break
 		}
+		if msg.IsImageGeneration {
+			break // stop chain on image generation message
+		}
 		messages = append(messages, &msg)
 		replyToID = msg.ReplyToID
 	}

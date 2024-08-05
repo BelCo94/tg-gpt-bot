@@ -8,11 +8,15 @@ import (
 	"net/http"
 )
 
-const apiURL = "https://api.openai.com/v1/chat/completions"
+const (
+	textApiURL  = "https://api.openai.com/v1/chat/completions"
+	imageApiURL = "https://api.openai.com/v1/images/generations"
+)
 
 type OpenAIConfig struct {
 	Token        string `toml:"TOKEN"`
 	Model        string `toml:"MODEL"`
+	ImageModel   string `toml:"IMAGE_MODEL"`
 	SystemPrompt string `toml:"SYSTEM_PROMPT"`
 }
 
@@ -34,6 +38,19 @@ type OpenAIResponse struct {
 	Choices []struct {
 		Message MessageT `json:"message"`
 	} `json:"choices"`
+}
+
+type imagePayloadT struct {
+	Prompt         string `json:"prompt"`
+	Model          string `json:"model"`
+	Size           string `json:"size"`
+	NumberOfImages int    `json:"n"`
+}
+
+type OpenAIImageResponse struct {
+	Data []struct {
+		Url string `json:"url"`
+	} `json:"data"`
 }
 
 func PreparePayload(messages []MessageT, config OpenAIConfig) ([]byte, error) {
@@ -59,7 +76,7 @@ func PreparePayload(messages []MessageT, config OpenAIConfig) ([]byte, error) {
 
 func AskOpenAI(payload []byte, config OpenAIConfig) (*MessageT, error) {
 
-	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", textApiURL, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -85,4 +102,47 @@ func AskOpenAI(payload []byte, config OpenAIConfig) (*MessageT, error) {
 		return &openAIResp.Choices[0].Message, nil
 	}
 	return nil, fmt.Errorf("no message received from OpenAI")
+}
+
+func PrepareImagePayload(prompt string, config OpenAIConfig) ([]byte, error) {
+	data := imagePayloadT{
+		Prompt:         prompt,
+		Model:          config.ImageModel,
+		Size:           "1024x1024",
+		NumberOfImages: 1,
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return jsonData, nil
+}
+
+func AskOpenAIImage(payload []byte, config OpenAIConfig) (string, error) {
+	req, err := http.NewRequest("POST", imageApiURL, bytes.NewBuffer(payload))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.Token))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var openAIImageResp OpenAIImageResponse
+	if err := json.Unmarshal(body, &openAIImageResp); err != nil {
+		return "", err
+	}
+
+	if len(openAIImageResp.Data) > 0 {
+		return openAIImageResp.Data[0].Url, nil
+	}
+
+	return "", fmt.Errorf("no image received from OpenAI")
 }

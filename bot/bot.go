@@ -159,11 +159,44 @@ func (bot *Bot) askOpenAI(messages []*storage.Message) error {
 		return err
 	}
 	storedMessage := &storage.Message{
-		ID:        int64(sentMessage.MessageID),
-		ChatID:    sentMessage.Chat.ID,
-		UserID:    int64(sentMessage.From.ID),
-		Text:      sentMessage.Text,
-		ReplyToID: int64(sentMessage.ReplyToMessage.MessageID),
+		ID:                int64(sentMessage.MessageID),
+		ChatID:            sentMessage.Chat.ID,
+		UserID:            int64(sentMessage.From.ID),
+		Text:              sentMessage.Text,
+		ReplyToID:         int64(sentMessage.ReplyToMessage.MessageID),
+		IsImageGeneration: false,
+	}
+	return bot.storage.CreateMessage(storedMessage)
+}
+
+func (bot *Bot) genOpenAIImage(msg *storage.Message) error {
+	if msg.Text == "" {
+		return fmt.Errorf("empty message")
+	}
+	paylaod, err := openai.PrepareImagePayload(msg.Text, bot.config.OpenAI)
+	if err != nil {
+		return err
+	}
+	image_url, err := openai.AskOpenAIImage(paylaod, bot.config.OpenAI)
+	if err != nil {
+		return err
+	}
+	text := prepareTextForMarkdownV2(image_url)
+	newMsg := tgbotapi.NewMessage(msg.ChatID, text)
+	newMsg.ReplyToMessageID = int(msg.ID)
+	newMsg.ParseMode = "MarkdownV2"
+
+	sentMessage, err := bot.tgbot.Send(newMsg)
+	if err != nil {
+		return err
+	}
+	storedMessage := &storage.Message{
+		ID:                int64(sentMessage.MessageID),
+		ChatID:            sentMessage.Chat.ID,
+		UserID:            int64(sentMessage.From.ID),
+		Text:              sentMessage.Text,
+		ReplyToID:         int64(sentMessage.ReplyToMessage.MessageID),
+		IsImageGeneration: true,
 	}
 	return bot.storage.CreateMessage(storedMessage)
 }

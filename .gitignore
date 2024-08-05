@@ -3,3 +3,4 @@ build/
 data/
 .vscode/
 __debug*
+.idea/

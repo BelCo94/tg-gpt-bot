@@ -27,15 +27,20 @@ func (bot *Bot) messageHandler(msg *tgbotapi.Message) error {
 	}
 	fmt.Printf("Handle message in chat %s from %s\n", formatChat(msg.Chat), formatUser(msg.From))
 	storedMessage := &storage.Message{
-		ID:        int64(msg.MessageID),
-		ChatID:    msg.Chat.ID,
-		UserID:    user.ID,
-		Text:      msg.Text,
-		ReplyToID: -1,
+		ID:                int64(msg.MessageID),
+		ChatID:            msg.Chat.ID,
+		UserID:            user.ID,
+		Text:              msg.Text,
+		ReplyToID:         -1,
+		IsImageGeneration: false,
 	}
 	switch {
 	case msg.IsCommand() && msg.Command() == "ask":
 		storedMessage.Text = msg.CommandArguments()
+	case msg.IsCommand() && msg.Command() == "img":
+		storedMessage.Text = msg.CommandArguments()
+		storedMessage.IsImageGeneration = true
+		break
 	case msg.ReplyToMessage != nil:
 		storedMessage.ReplyToID = int64(msg.ReplyToMessage.MessageID)
 	case msg.Chat.IsPrivate():
@@ -46,6 +51,9 @@ func (bot *Bot) messageHandler(msg *tgbotapi.Message) error {
 	}
 	if err := bot.storage.CreateMessage(storedMessage); err != nil {
 		return err
+	}
+	if storedMessage.IsImageGeneration {
+		return bot.genOpenAIImage(storedMessage)
 	}
 	messages := bot.storage.GetMessageChain(storedMessage, bot.config.Base.ChatHistorySize)
 	return bot.askOpenAI(messages)

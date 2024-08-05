@@ -13,9 +13,10 @@ type Chat struct {
 }
 
 type Message struct {
-	ID        int64 `gorm:"primaryKey"`
-	ChatID    int64 `gorm:"primaryKey"`
-	UserID    int64
-	Text      string
-	ReplyToID int64
+	ID                int64 `gorm:"primaryKey"`
+	ChatID            int64 `gorm:"primaryKey"`
+	UserID            int64
+	Text              string
+	ReplyToID         int64
+	IsImageGeneration bool
 }
