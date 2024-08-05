@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -91,7 +91,7 @@ func AskOpenAI(payload []byte, config OpenAIConfig) (*MessageT, error) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	var openAIResp OpenAIResponse
 	if err := json.Unmarshal(body, &openAIResp); err != nil {
@@ -133,7 +133,7 @@ func AskOpenAIImage(payload []byte, config OpenAIConfig) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	var openAIImageResp OpenAIImageResponse
 	if err := json.Unmarshal(body, &openAIImageResp); err != nil {
