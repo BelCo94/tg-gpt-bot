@@ -105,7 +105,7 @@ func (bot *Bot) Run() {
 
 	updates, err := bot.tgbot.GetUpdatesChan(updater)
 	if err != nil {
-		fmt.Printf("failed to connect to update channel: %v", err)
+		fmt.Printf("failed to connect to update channel: %v\n", err)
 		return
 	}
 	fmt.Printf("running %s ...\n", bot.tgbot.Self.UserName)
@@ -118,7 +118,7 @@ func (bot *Bot) handleUpdate(update tgbotapi.Update) {
 	if update.Message != nil {
 		err := bot.messageHandler(update.Message)
 		if err != nil {
-			fmt.Printf("Fail to handle a message: %v", err)
+			fmt.Printf("Fail to handle a message: %v\n", err)
 		}
 	}
 }
@@ -141,11 +141,11 @@ func (bot *Bot) askOpenAI(messages []*storage.Message) error {
 			Content: msg.Text,
 		})
 	}
-	paylaod, err := openai.PreparePayload(conversation, bot.config.OpenAI)
+	payload, err := openai.PreparePayload(conversation, bot.config.OpenAI)
 	if err != nil {
 		return err
 	}
-	answer, err := openai.AskOpenAI(paylaod, bot.config.OpenAI)
+	answer, err := openai.AskOpenAI(payload, bot.config.OpenAI)
 	if err != nil {
 		return err
 	}
@@ -177,11 +177,11 @@ func (bot *Bot) genOpenAIImage(msg *storage.Message) error {
 	if err != nil {
 		return err
 	}
-	image_url, err := openai.AskOpenAIImage(paylaod, bot.config.OpenAI)
+	imageUrl, err := openai.AskOpenAIImage(paylaod, bot.config.OpenAI)
 	if err != nil {
 		return err
 	}
-	text := prepareTextForMarkdownV2(image_url)
+	text := prepareTextForMarkdownV2(imageUrl)
 	newMsg := tgbotapi.NewMessage(msg.ChatID, text)
 	newMsg.ReplyToMessageID = int(msg.ID)
 	newMsg.ParseMode = "MarkdownV2"
